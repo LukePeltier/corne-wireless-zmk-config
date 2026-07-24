@@ -8,6 +8,8 @@ on:
 jobs:
   matrix:
     runs-on: linux-amd64
+    container:
+      image: zmkfirmware/zmk-build-arm:stable
     name: Fetch Build Keyboards
     outputs:
       build_matrix: ${{ steps.build-matrix.outputs.build_matrix }}
@@ -19,9 +21,7 @@ jobs:
         id: build-matrix
         shell: bash
         run: |
-          build_matrix="$(docker run --rm \
-            -v "${FORGEJO_WORKSPACE}:/work:ro" \
-            mikefarah/yq:4 eval -o=json -I=0 /work/build.yaml)"
+          build_matrix="$(python3 -c 'import json, yaml; print(json.dumps(yaml.safe_load(open("build.yaml"))))')"
           printf 'build_matrix=%s\n' "$build_matrix" >> "$FORGEJO_OUTPUT"
           printf '%s\n' "$build_matrix"
 
